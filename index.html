@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>每日營養標示 ｜ 熱量與蛋白質計算機</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div class="app">
+
+  <header class="masthead">
+    <div class="masthead-title">
+      <span class="eyebrow">Daily Nutrition Tracker</span>
+      <h1>每日營養<span class="accent">標示</span></h1>
+    </div>
+    <div class="date-control">
+      <label for="log-date">查看日期</label>
+      <input type="date" id="log-date" />
+    </div>
+  </header>
+
+  <div class="main-grid">
+
+    <!-- 左側：個人資料與目標設定 -->
+    <div class="sidebar">
+      <div class="card">
+        <h2>基本資料</h2>
+        <div class="field-row">
+          <div class="field">
+            <label for="age">年齡</label>
+            <input type="number" id="age" min="10" max="100" placeholder="例如 30" />
+          </div>
+          <div class="field">
+            <label for="gender">性別</label>
+            <select id="gender">
+              <option value="male">男性</option>
+              <option value="female">女性</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="height">身高（公分）</label>
+            <input type="number" id="height" min="100" max="230" placeholder="例如 170" />
+          </div>
+          <div class="field">
+            <label for="weight">體重（公斤）</label>
+            <input type="number" id="weight" min="30" max="200" step="0.1" placeholder="例如 65" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="activity">活動量</label>
+          <select id="activity">
+            <option value="1.2">久坐（很少運動）</option>
+            <option value="1.375">輕度活動（每週運動 1-3 天）</option>
+            <option value="1.55" selected>中度活動（每週運動 3-5 天）</option>
+            <option value="1.725">高度活動（每週運動 6-7 天）</option>
+            <option value="1.9">極高活動（勞力工作或每天訓練）</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="goal">目標方向</label>
+          <select id="goal">
+            <option value="maintain">維持體重</option>
+            <option value="cut">減脂</option>
+            <option value="bulk">增肌</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button id="btn-recalc" type="button">重新計算建議值</button>
+        </div>
+        <p class="hint" id="bmr-hint">填入基本資料後，會依 Mifflin-St Jeor 公式估算基礎代謝率與每日總消耗，並自動帶入下方目標欄位。</p>
+      </div>
+
+      <div class="card">
+        <h2>目標設定（可手動修改）</h2>
+        <div class="field">
+          <label for="target-calories">目標熱量（大卡 / 日）</label>
+          <input type="number" id="target-calories" min="0" step="10" />
+        </div>
+        <div class="field">
+          <label for="target-protein">目標蛋白質（公克 / 日）</label>
+          <input type="number" id="target-protein" min="0" step="1" />
+        </div>
+        <p class="hint">此欄位一經手動修改，將不再被「重新計算建議值」自動覆蓋，除非你再次按下該按鈕。</p>
+      </div>
+    </div>
+
+    <!-- 右側：營養標示牌 + 飲食紀錄 -->
+    <div class="main-col">
+
+      <div class="facts-panel" id="facts-panel">
+        <div class="facts-header">
+          <span class="eyebrow">Today's Facts</span>
+          <h2>今日營養總表</h2>
+        </div>
+        <div class="facts-big-row">
+          <span class="label">熱量</span>
+          <span class="facts-big-number"><span id="fact-calories">0</span><span class="unit">大卡</span></span>
+        </div>
+        <div class="facts-sub">
+          <div class="facts-line">
+            <div style="flex:1">
+              <span class="label">蛋白質</span>
+              <div class="progress-track"><div class="progress-fill" id="protein-bar" style="width:0%"></div></div>
+            </div>
+            <span class="value" id="fact-protein">0 g</span>
+            <span class="dv-pct" id="protein-pct">0%</span>
+          </div>
+          <div class="facts-line">
+            <div style="flex:1">
+              <span class="label">熱量攝取進度</span>
+              <div class="progress-track"><div class="progress-fill" id="calorie-bar" style="width:0%"></div></div>
+            </div>
+            <span class="value" id="fact-calories-target">目標 0</span>
+            <span class="dv-pct" id="calorie-pct">0%</span>
+          </div>
+        </div>
+        <div class="facts-footer">
+          <div class="remaining">
+            <span id="remaining-calories">熱量剩餘 0 大卡</span>
+            <span id="remaining-protein">蛋白質剩餘 0 公克</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>新增飲食紀錄</h2>
+        <div class="log-mode-toggle">
+          <button type="button" id="mode-db" class="active">從食物資料庫選擇</button>
+          <button type="button" id="mode-manual">手動輸入</button>
+        </div>
+
+        <form id="form-db" class="log-form">
+          <div class="field">
+            <label for="food-select">食物</label>
+            <select id="food-select"></select>
+          </div>
+          <div class="field">
+            <label for="food-grams">份量（公克）</label>
+            <input type="number" id="food-grams" min="1" value="100" />
+          </div>
+          <div class="field">
+            <label for="meal-type-db">餐別</label>
+            <select id="meal-type-db">
+              <option value="早餐">早餐</option>
+              <option value="午餐">午餐</option>
+              <option value="晚餐">晚餐</option>
+              <option value="點心">點心</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>&nbsp;</label>
+            <span class="hint" id="db-preview">— 大卡 ／ — 公克蛋白質</span>
+          </div>
+          <button type="submit">加入紀錄</button>
+        </form>
+
+        <form id="form-manual" class="log-form" style="display:none">
+          <div class="field">
+            <label for="manual-name">食物名稱</label>
+            <input type="text" id="manual-name" placeholder="例如 便當" />
+          </div>
+          <div class="field">
+            <label for="manual-calories">熱量（大卡）</label>
+            <input type="number" id="manual-calories" min="0" step="1" />
+          </div>
+          <div class="field">
+            <label for="manual-protein">蛋白質（公克）</label>
+            <input type="number" id="manual-protein" min="0" step="0.1" />
+          </div>
+          <div class="field">
+            <label for="meal-type-manual">餐別</label>
+            <select id="meal-type-manual">
+              <option value="早餐">早餐</option>
+              <option value="午餐">午餐</option>
+              <option value="晚餐">晚餐</option>
+              <option value="點心">點心</option>
+            </select>
+          </div>
+          <button type="submit">加入紀錄</button>
+        </form>
+
+        <table id="log-table">
+          <thead>
+            <tr>
+              <th>餐別</th>
+              <th>食物</th>
+              <th>份量</th>
+              <th style="text-align:right">熱量</th>
+              <th style="text-align:right">蛋白質</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="log-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="log-empty">今天還沒有紀錄，加入第一筆食物吧。</div>
+      </div>
+
+      <div class="card">
+        <h2>歷史紀錄</h2>
+        <div class="history-list" id="history-list"></div>
+        <div class="empty-state" id="history-empty">目前還沒有任何歷史紀錄。</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="data-footer">
+    <p class="hint">紀錄會自動儲存在此瀏覽器中（localStorage）。若要備份或換裝置使用，請匯出 JSON 檔案，並在需要時匯入還原。</p>
+    <div class="btn-row">
+      <button type="button" class="secondary" id="btn-export">匯出紀錄（JSON）</button>
+      <button type="button" class="secondary" id="btn-import">匯入紀錄（JSON）</button>
+      <input type="file" id="import-file" accept="application/json" style="display:none" />
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
