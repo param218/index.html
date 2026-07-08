@@ -1,0 +1,494 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=JetBrains+Mono:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+/* =============================================
+   設計系統
+   ============================================= */
+:root {
+  --paper:   #F1F3EF;
+  --surface: #FFFFFF;
+  --ink:     #14181A;
+  --ink-soft:#5C645E;
+  --border:  #D8DAD3;
+  --gold:    #E0A23B;
+  --green:   #5C8A52;
+  --blue:    #3E5C8A;
+  --red:     #C1432A;
+
+  --font-display: 'Fraunces', Georgia, 'Noto Serif TC', serif;
+  --font-body:    'Inter', -apple-system, BlinkMacSystemFont, 'Noto Sans TC', sans-serif;
+  --font-mono:    'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+
+  /* iPhone safe area 變數（非 iPhone 時為 0） */
+  --safe-top:    env(safe-area-inset-top,    0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left,   0px);
+  --safe-right:  env(safe-area-inset-right,  0px);
+}
+
+/* =============================================
+   Reset
+   ============================================= */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  /* iPhone Dynamic Island / 圓角 padding */
+  padding:
+    max(16px, var(--safe-top))
+    max(16px, var(--safe-right))
+    max(60px, calc(var(--safe-bottom) + 20px))
+    max(16px, var(--safe-left));
+}
+*:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* =============================================
+   外層容器
+   ============================================= */
+#app { max-width: 1080px; margin: 0 auto; }
+
+/* =============================================
+   通知橫幅
+   ============================================= */
+.banner {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: .85rem;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.banner--warn {
+  background: #FCF0EA;
+  border: 1px solid var(--red);
+  color: var(--red);
+}
+
+/* =============================================
+   Auth Banner
+   ============================================= */
+.auth-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-size: .82rem;
+}
+.auth-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.auth-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.auth-dot.signed-in { background: var(--green); }
+.auth-dot.signed-out { background: var(--gold); }
+#authLabel { color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.auth-btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: .82rem;
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.auth-btn:hover { background: var(--ink); color: #fff; }
+.auth-btn.signed-in {
+  border-color: var(--ink-soft);
+  color: var(--ink-soft);
+}
+.auth-btn.signed-in:hover { background: var(--ink-soft); color: #fff; }
+
+/* =============================================
+   頁頭
+   ============================================= */
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  letter-spacing: .14em;
+  color: var(--ink-soft);
+  margin: 0 0 4px;
+  text-transform: uppercase;
+}
+.app-header h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 2rem;
+  margin: 0;
+}
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+.ctrl-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: .78rem;
+  color: var(--ink-soft);
+}
+.ctrl-label input {
+  font-family: var(--font-mono);
+  font-size: .9rem;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  min-height: 42px; /* 觸控友善 */
+}
+#goalInput { width: 130px; }
+.btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: .85rem;
+  cursor: pointer;
+  border-radius: 6px;
+  border: 1px solid var(--ink);
+  background: transparent;
+  color: var(--ink);
+  padding: 10px 18px;
+  min-height: 42px;
+}
+.btn:hover { background: var(--ink); color: #fff; }
+.btn--outline { border-color: var(--ink-soft); color: var(--ink-soft); }
+.btn--outline:hover { background: var(--ink-soft); color: #fff; border-color: var(--ink-soft); }
+
+/* =============================================
+   主要兩欄佈局
+   ============================================= */
+main.layout {
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* =============================================
+   餐點卡片
+   ============================================= */
+.meal-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 6px solid var(--accent);
+  border-radius: 10px;
+  padding: 18px 18px 16px;
+  margin-bottom: 18px;
+}
+.meal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.meal-header h2 { font-family: var(--font-display); font-size: 1.25rem; margin: 0; }
+.meal-subtotal { font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); }
+
+.item-list { list-style: none; margin: 0 0 10px; padding: 0; }
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.item-name { flex: 1; font-size: .92rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.item-cal, .item-protein {
+  font-family: var(--font-mono);
+  font-size: .8rem;
+  color: var(--ink-soft);
+  min-width: 58px;
+  text-align: right;
+  white-space: nowrap;
+}
+.delete-btn {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--ink-soft);
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+  min-width: 44px; min-height: 44px; /* iOS 最小觸控目標 */
+  display: flex; align-items: center; justify-content: center;
+}
+.delete-btn:hover { color: var(--red); background: rgba(193,67,42,.08); }
+.empty-state { font-size: .86rem; color: var(--ink-soft); margin: 4px 0 10px; }
+
+/* 新增表單 */
+.add-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+.add-form input {
+  font-family: var(--font-body);
+  font-size: .88rem;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  min-height: 42px;
+}
+.add-form input[name="name"] { flex: 1 1 140px; }
+.add-form input[type="number"] { width: 116px; }
+.add-form button {
+  background: var(--ink); color: #fff;
+  border: none; padding: 9px 18px;
+  border-radius: 6px; font-weight: 600;
+  font-size: .88rem; cursor: pointer;
+  min-height: 42px; white-space: nowrap;
+}
+.add-form button:hover { opacity: .85; }
+.form-error { color: var(--red); font-size: .78rem; width: 100%; margin: 2px 0 0; }
+
+/* =============================================
+   右側面板
+   ============================================= */
+.summary { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+/* 個人資料卡 */
+.profile-card {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+}
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin-bottom: 4px;
+}
+.profile-grid label {
+  display: flex; flex-direction: column; gap: 4px;
+  font-size: .76rem; color: var(--ink-soft);
+}
+.profile-grid input, .profile-grid select {
+  font-family: var(--font-mono);
+  font-size: .86rem;
+  padding: 8px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--ink);
+  min-height: 38px;
+}
+.profile-note { font-size: .72rem; color: var(--ink-soft); margin: 8px 0 0; line-height: 1.5; }
+
+/* 營養標示卡 */
+.nutrition-label {
+  background: #fff;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  padding: 20px 22px;
+}
+.label-eyebrow { font-family: var(--font-mono); font-size: .66rem; letter-spacing: .12em; color: var(--ink-soft); margin: 0; }
+.label-title { font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; margin: 3px 0 8px; }
+.label-rule { height: 1px; background: var(--border); margin: 8px 0; }
+.label-rule.thick { height: 5px; background: var(--ink); }
+.label-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; font-family: var(--font-mono); font-size: .92rem; }
+.label-row .value { font-weight: 700; font-size: 1.1rem; }
+.label-row .value small { font-size: .64rem; font-weight: 400; margin-left: 2px; }
+.progress-track { height: 10px; background: #ECEEEA; border-radius: 6px; overflow: hidden; margin: 10px 0 5px; }
+.progress-fill { height: 100%; border-radius: 6px; transition: width .3s ease, background .3s ease; }
+.label-status { font-family: var(--font-mono); font-size: .8rem; color: var(--ink-soft); margin-bottom: 2px; }
+
+/* =============================================
+   歷史紀錄 & 匯出
+   ============================================= */
+.history-section { margin-top: 28px; }
+#historyPanel { margin-top: 18px; }
+.section-h3 { font-family: var(--font-display); font-size: 1.1rem; margin: 20px 0 10px; }
+
+.chart-wrap {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 匯出列 */
+.export-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-body);
+  font-size: .88rem;
+  flex: 1 1 200px;
+  transition: border-color .15s, box-shadow .15s;
+  min-height: 60px;
+}
+.export-btn:hover { border-color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.export-btn:active { transform: scale(.98); }
+.export-btn strong { display: block; font-size: .92rem; margin-bottom: 2px; }
+.export-btn small { color: var(--ink-soft); font-size: .76rem; }
+.export-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+/* 歷史表格 */
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .86rem;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.history-table th, .history-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-family: var(--font-mono);
+  white-space: nowrap;
+}
+.history-table th { font-family: var(--font-body); font-weight: 600; background: var(--paper); }
+.history-table tr.clickable { cursor: pointer; }
+.history-table tr.clickable:hover { background: rgba(0,0,0,.03); }
+.loading-text { color: var(--ink-soft); font-size: .88rem; margin: 8px 0; }
+
+/* =============================================
+   頁尾 & 狀態訊息
+   ============================================= */
+.app-footer { margin-top: 32px; font-size: .75rem; color: var(--ink-soft); text-align: center; }
+
+#statusMessage {
+  position: fixed;
+  bottom: max(20px, var(--safe-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ink);
+  color: #fff;
+  padding: 11px 20px;
+  border-radius: 8px;
+  font-size: .85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+  z-index: 999;
+  white-space: nowrap;
+  max-width: calc(100vw - 32px);
+}
+#statusMessage.show { opacity: 1; }
+
+/* =============================================
+   iPhone 14 Pro（393px）＆ 一般手機響應式
+   ============================================= */
+@media (max-width: 600px) {
+
+  body {
+    padding-top: max(12px, var(--safe-top));
+    padding-left:  max(14px, var(--safe-left));
+    padding-right: max(14px, var(--safe-right));
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .app-header h1 { font-size: 1.55rem; }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .ctrl-label input { width: 100%; }
+  #goalInput { width: 100%; }
+  .btn { width: 100%; justify-content: center; text-align: center; }
+
+  /* 主欄單列 */
+  main.layout {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  /* 個人資料 + 營養摘要 移到餐點卡片前 */
+  .summary {
+    order: -1;
+    position: static;
+    margin-bottom: 20px;
+  }
+
+  /* 個人資料：保持 2 欄（足夠空間） */
+  .profile-grid { grid-template-columns: 1fr 1fr; }
+  .profile-card { padding: 14px 14px; }
+
+  /* 新增表單：縱向排列 */
+  .add-form { flex-direction: column; gap: 8px; }
+  .add-form input[name="name"],
+  .add-form input[type="number"] { width: 100%; flex: none; }
+  .add-form button { width: 100%; padding: 12px; }
+
+  /* 餐點列：名稱換行 */
+  .item-row { flex-wrap: wrap; gap: 4px; }
+  .item-name { flex: 1 1 100%; font-size: .9rem; }
+  .item-cal, .item-protein { min-width: auto; }
+  .delete-btn { margin-left: auto; }
+
+  /* 歷史表格：橫向捲動 */
+  #historyTableContainer { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .history-table { min-width: 460px; }
+
+  /* 匯出按鈕單欄 */
+  .export-bar { flex-direction: column; }
+  .export-btn { flex: none; width: 100%; }
+
+  /* Auth Banner 換行 */
+  .auth-banner { gap: 8px; }
+  .auth-btn { width: 100%; text-align: center; }
+}
+
+/* 超小螢幕微調 */
+@media (max-width: 360px) {
+  .profile-grid { grid-template-columns: 1fr; }
+  .app-header h1 { font-size: 1.35rem; }
+}

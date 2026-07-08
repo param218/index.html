@@ -1,225 +1,92 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>每日營養標示 ｜ 熱量與蛋白質計算機</title>
-<link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>飲食紀錄本</title>
+<link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<div class="app">
+<div id="app">
 
-  <header class="masthead">
-    <div class="masthead-title">
-      <span class="eyebrow">Daily Nutrition Tracker</span>
-      <h1>每日營養<span class="accent">標示</span></h1>
+  <!-- 儲存功能警示 -->
+  <div id="storageWarning" class="banner banner--warn" hidden>
+    ⚠️ 瀏覽器的本地儲存功能無法使用（可能是無痕模式），資料不會被保存。
+  </div>
+
+  <!-- Firebase 登入狀態列 -->
+  <div id="authBanner" class="auth-banner" hidden>
+    <div class="auth-info" id="authInfo">
+      <span class="auth-dot" id="authDot"></span>
+      <span id="authLabel">未登入・資料僅存於本裝置</span>
     </div>
-    <div class="date-control">
-      <label for="log-date">查看日期</label>
-      <input type="date" id="log-date" />
+    <button id="authBtn" class="auth-btn" type="button">用 Google 登入以跨裝置同步</button>
+  </div>
+
+  <!-- 頁頭 -->
+  <header class="app-header">
+    <div class="title-block">
+      <p class="eyebrow">每日飲食 · 卡路里與蛋白質</p>
+      <h1>飲食紀錄本</h1>
+    </div>
+    <div class="controls">
+      <label class="ctrl-label">日期
+        <input type="date" id="dateInput">
+      </label>
+      <label class="ctrl-label">每日卡路里目標
+        <input type="number" id="goalInput" min="1" step="10" inputmode="decimal">
+      </label>
+      <button class="btn" id="todayBtn" type="button">回到今天</button>
     </div>
   </header>
 
-  <div class="main-grid">
+  <main class="layout">
+    <section class="meals" id="mealsContainer" aria-label="餐點紀錄"></section>
+    <aside class="summary" aria-label="個人資料與本日營養">
+      <div id="profileContainer"></div>
+      <div id="summaryContainer"></div>
+    </aside>
+  </main>
 
-    <!-- 左側：個人資料與目標設定 -->
-    <div class="sidebar">
-      <div class="card">
-        <h2>基本資料</h2>
-        <div class="field-row">
-          <div class="field">
-            <label for="age">年齡</label>
-            <input type="number" id="age" min="10" max="100" placeholder="例如 30" />
-          </div>
-          <div class="field">
-            <label for="gender">性別</label>
-            <select id="gender">
-              <option value="male">男性</option>
-              <option value="female">女性</option>
-            </select>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label for="height">身高（公分）</label>
-            <input type="number" id="height" min="100" max="230" placeholder="例如 170" />
-          </div>
-          <div class="field">
-            <label for="weight">體重（公斤）</label>
-            <input type="number" id="weight" min="30" max="200" step="0.1" placeholder="例如 65" />
-          </div>
-        </div>
-        <div class="field">
-          <label for="activity">活動量</label>
-          <select id="activity">
-            <option value="1.2">久坐（很少運動）</option>
-            <option value="1.375">輕度活動（每週運動 1-3 天）</option>
-            <option value="1.55" selected>中度活動（每週運動 3-5 天）</option>
-            <option value="1.725">高度活動（每週運動 6-7 天）</option>
-            <option value="1.9">極高活動（勞力工作或每天訓練）</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="goal">目標方向</label>
-          <select id="goal">
-            <option value="maintain">維持體重</option>
-            <option value="cut">減脂</option>
-            <option value="bulk">增肌</option>
-          </select>
-        </div>
-        <div class="btn-row">
-          <button id="btn-recalc" type="button">重新計算建議值</button>
-        </div>
-        <p class="hint" id="bmr-hint">填入基本資料後，會依 Mifflin-St Jeor 公式估算基礎代謝率與每日總消耗，並自動帶入下方目標欄位。</p>
+  <!-- 歷史 & 匯出 -->
+  <section class="history-section">
+    <button id="historyToggle" class="btn btn--outline" type="button" aria-expanded="false" aria-controls="historyPanel">
+      查看歷史紀錄 &amp; 匯出
+    </button>
+    <div id="historyPanel" hidden>
+      <h3 class="section-h3">近 14 天熱量趨勢</h3>
+      <div class="chart-wrap" id="chartContainer"><p class="loading-text">載入中…</p></div>
+
+      <h3 class="section-h3">匯出資料</h3>
+      <div class="export-bar">
+        <button id="exportWeekBtn" class="export-btn" type="button">
+          <span class="export-icon">📋</span>
+          <span><strong>複製本週摘要</strong><br><small>貼給 AI 詢問飲食建議</small></span>
+        </button>
+        <button id="exportCSVBtn" class="export-btn" type="button">
+          <span class="export-icon">⬇</span>
+          <span><strong>下載 CSV</strong><br><small>用 Excel / Numbers 分析</small></span>
+        </button>
       </div>
 
-      <div class="card">
-        <h2>目標設定（可手動修改）</h2>
-        <div class="field">
-          <label for="target-calories">目標熱量（大卡 / 日）</label>
-          <input type="number" id="target-calories" min="0" step="10" />
-        </div>
-        <div class="field">
-          <label for="target-protein">目標蛋白質（公克 / 日）</label>
-          <input type="number" id="target-protein" min="0" step="1" />
-        </div>
-        <p class="hint">此欄位一經手動修改，將不再被「重新計算建議值」自動覆蓋，除非你再次按下該按鈕。</p>
-      </div>
+      <h3 class="section-h3">歷史紀錄列表</h3>
+      <div id="historyTableContainer"><p class="loading-text">載入中…</p></div>
     </div>
+  </section>
 
-    <!-- 右側：營養標示牌 + 飲食紀錄 -->
-    <div class="main-col">
-
-      <div class="facts-panel" id="facts-panel">
-        <div class="facts-header">
-          <span class="eyebrow">Today's Facts</span>
-          <h2>今日營養總表</h2>
-        </div>
-        <div class="facts-big-row">
-          <span class="label">熱量</span>
-          <span class="facts-big-number"><span id="fact-calories">0</span><span class="unit">大卡</span></span>
-        </div>
-        <div class="facts-sub">
-          <div class="facts-line">
-            <div style="flex:1">
-              <span class="label">蛋白質</span>
-              <div class="progress-track"><div class="progress-fill" id="protein-bar" style="width:0%"></div></div>
-            </div>
-            <span class="value" id="fact-protein">0 g</span>
-            <span class="dv-pct" id="protein-pct">0%</span>
-          </div>
-          <div class="facts-line">
-            <div style="flex:1">
-              <span class="label">熱量攝取進度</span>
-              <div class="progress-track"><div class="progress-fill" id="calorie-bar" style="width:0%"></div></div>
-            </div>
-            <span class="value" id="fact-calories-target">目標 0</span>
-            <span class="dv-pct" id="calorie-pct">0%</span>
-          </div>
-        </div>
-        <div class="facts-footer">
-          <div class="remaining">
-            <span id="remaining-calories">熱量剩餘 0 大卡</span>
-            <span id="remaining-protein">蛋白質剩餘 0 公克</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>新增飲食紀錄</h2>
-        <div class="log-mode-toggle">
-          <button type="button" id="mode-db" class="active">從食物資料庫選擇</button>
-          <button type="button" id="mode-manual">手動輸入</button>
-        </div>
-
-        <form id="form-db" class="log-form">
-          <div class="field">
-            <label for="food-select">食物</label>
-            <select id="food-select"></select>
-          </div>
-          <div class="field">
-            <label for="food-grams">份量（公克）</label>
-            <input type="number" id="food-grams" min="1" value="100" />
-          </div>
-          <div class="field">
-            <label for="meal-type-db">餐別</label>
-            <select id="meal-type-db">
-              <option value="早餐">早餐</option>
-              <option value="午餐">午餐</option>
-              <option value="晚餐">晚餐</option>
-              <option value="點心">點心</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>&nbsp;</label>
-            <span class="hint" id="db-preview">— 大卡 ／ — 公克蛋白質</span>
-          </div>
-          <button type="submit">加入紀錄</button>
-        </form>
-
-        <form id="form-manual" class="log-form" style="display:none">
-          <div class="field">
-            <label for="manual-name">食物名稱</label>
-            <input type="text" id="manual-name" placeholder="例如 便當" />
-          </div>
-          <div class="field">
-            <label for="manual-calories">熱量（大卡）</label>
-            <input type="number" id="manual-calories" min="0" step="1" />
-          </div>
-          <div class="field">
-            <label for="manual-protein">蛋白質（公克）</label>
-            <input type="number" id="manual-protein" min="0" step="0.1" />
-          </div>
-          <div class="field">
-            <label for="meal-type-manual">餐別</label>
-            <select id="meal-type-manual">
-              <option value="早餐">早餐</option>
-              <option value="午餐">午餐</option>
-              <option value="晚餐">晚餐</option>
-              <option value="點心">點心</option>
-            </select>
-          </div>
-          <button type="submit">加入紀錄</button>
-        </form>
-
-        <table id="log-table">
-          <thead>
-            <tr>
-              <th>餐別</th>
-              <th>食物</th>
-              <th>份量</th>
-              <th style="text-align:right">熱量</th>
-              <th style="text-align:right">蛋白質</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="log-tbody"></tbody>
-        </table>
-        <div class="empty-state" id="log-empty">今天還沒有紀錄，加入第一筆食物吧。</div>
-      </div>
-
-      <div class="card">
-        <h2>歷史紀錄</h2>
-        <div class="history-list" id="history-list"></div>
-        <div class="empty-state" id="history-empty">目前還沒有任何歷史紀錄。</div>
-      </div>
-
-    </div>
-  </div>
-
-  <div class="data-footer">
-    <p class="hint">紀錄會自動儲存在此瀏覽器中（localStorage）。若要備份或換裝置使用，請匯出 JSON 檔案，並在需要時匯入還原。</p>
-    <div class="btn-row">
-      <button type="button" class="secondary" id="btn-export">匯出紀錄（JSON）</button>
-      <button type="button" class="secondary" id="btn-import">匯入紀錄（JSON）</button>
-      <input type="file" id="import-file" accept="application/json" style="display:none" />
-    </div>
-  </div>
-
+  <footer class="app-footer">
+    <p>資料儲存於此瀏覽器（localStorage）或登入後同步至 Firebase，不會上傳至其他伺服器。</p>
+  </footer>
 </div>
 
-<div class="toast" id="toast"></div>
+<div id="statusMessage" role="status" aria-live="polite"></div>
 
-<script src="app.js"></script>
+<!-- Firebase SDK（若不需要跨裝置同步，保留也無妨） -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
